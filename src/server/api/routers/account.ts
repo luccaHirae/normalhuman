@@ -74,4 +74,59 @@ export const accountRouter = createTRPCRouter({
         },
       });
     }),
+
+  getThreads: privateProcedure
+    .input(
+      z.object({
+        accountId: z.string(),
+        tab: z.string(),
+        done: z.boolean(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      await authorizeAccountAccess(input.accountId, ctx.auth.userId);
+
+      const filter: Prisma.ThreadWhereInput = {};
+
+      if (input.tab === "inbox") {
+        filter.inboxStatus = true;
+      }
+
+      if (input.tab === "draft") {
+        filter.draftStatus = true;
+      }
+
+      if (input.tab === "sent") {
+        filter.sentStatus = true;
+      }
+
+      filter.done = {
+        equals: input.done,
+      };
+
+      return await ctx.db.thread.findMany({
+        where: filter,
+        include: {
+          emails: {
+            orderBy: {
+              sentAt: "asc",
+            },
+            select: {
+              from: true,
+              body: true,
+              bodySnippet: true,
+              emailLabel: true,
+              subject: true,
+              sysLabels: true,
+              id: true,
+              sentAt: true,
+            },
+          },
+        },
+        take: 15,
+        orderBy: {
+          lastMessageDate: "desc",
+        },
+      });
+    }),
 });
