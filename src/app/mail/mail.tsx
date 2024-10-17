@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountSwitcher } from "@/app/mail/account-switcher";
 import { Sidebar } from "@/app/mail/sidebar";
 import { ThreadList } from "@/app/mail/thread-list";
+import { ThreadDisplay } from "@/app/mail/thread-display";
 
 interface Props {
   defaultLayout?: number[];
@@ -106,7 +107,7 @@ export const Mail = ({
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize={defaultLayout[2]} minSize={30}>
-          Threads
+          <ThreadDisplay />
         </ResizablePanel>
       </ResizablePanelGroup>
     </TooltipProvider>
