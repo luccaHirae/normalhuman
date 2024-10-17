@@ -1,3 +1,11 @@
-export default async function Mail() {
-  return <h1>Mail</h1>;
+import { Mail } from "./mail";
+
+export default async function MailDashboard() {
+  return (
+    <Mail
+      defaultLayout={[20, 32, 48]}
+      defaultCollapsed={false}
+      navCollapsedSize={4}
+    />
+  );
 }
