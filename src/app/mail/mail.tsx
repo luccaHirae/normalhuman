@@ -11,6 +11,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountSwitcher } from "@/app/mail/account-switcher";
+import { Sidebar } from "@/app/mail/sidebar";
 
 interface Props {
   defaultLayout?: number[];
@@ -58,6 +59,8 @@ export const Mail = ({
             </div>
 
             <Separator />
+
+            <Sidebar isCollapsed={isCollapsed} />
 
             <div className="flex-1"></div>
           </div>

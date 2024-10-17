@@ -19,7 +19,10 @@ interface Props {
 
 export const AccountSwitcher = ({ isCollapsed }: Props) => {
   const { data, isLoading } = api.account.getAccounts.useQuery();
-  const [accountId, setAccountId] = useLocalStorage("accountId", "");
+  const [accountId, setAccountId] = useLocalStorage(
+    "normalhuman:accountId",
+    "",
+  );
 
   const handleAddAccount = async () => {
     const authUrl = await getAurinkoAuthUrl("Google");

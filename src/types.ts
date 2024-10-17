@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type LucideIcon } from "lucide-react";
 
 export interface SyncResponse {
   syncUpdatedToken: string;
@@ -82,4 +83,11 @@ export interface EmailAttachment {
 export interface EmailHeader {
   name: string;
   value: string;
+}
+
+export interface SidebarLink {
+  title: string;
+  label?: string;
+  icon: LucideIcon;
+  variant: "default" | "ghost";
 }
