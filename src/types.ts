@@ -91,3 +91,8 @@ export interface SidebarLink {
   icon: LucideIcon;
   variant: "default" | "ghost";
 }
+
+export interface Value {
+  label: string;
+  value: string;
+}
