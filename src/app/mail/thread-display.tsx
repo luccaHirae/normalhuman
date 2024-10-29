@@ -1,3 +1,5 @@
+"use client";
+
 import { format } from "date-fns";
 import { Archive, ArchiveX, Clock, MoreVertical, Trash2 } from "lucide-react";
 import { useThreads } from "@/hooks/use-threads";
@@ -11,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EmailDisplay } from "@/app/mail/email-display";
+import { ReplyBox } from "@/app/mail/reply-box";
 
 export const ThreadDisplay = () => {
   const { threadId, threads } = useThreads();
@@ -115,7 +118,7 @@ export const ThreadDisplay = () => {
 
           <Separator className="mt-auto" />
 
-          <div>Reply Box</div>
+          <ReplyBox />
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">

@@ -1,3 +1,5 @@
+"use client";
+
 import Avatar from "react-avatar";
 import { Letter } from "react-letter";
 import { useThreads } from "@/hooks/use-threads";

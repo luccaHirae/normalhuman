@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from "framer-motion";
 import React, { forwardRef, type Ref, useMemo } from "react";
 import { type ActionId, type ActionImpl } from "kbar";
