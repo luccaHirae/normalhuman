@@ -3,6 +3,7 @@ import {
   type EmailMessage,
   type SyncUpdatedResponse,
   type SyncResponse,
+  type EmailAddress,
 } from "@/types";
 
 export class Account {
@@ -107,6 +108,71 @@ export class Account {
       } else {
         console.error("Failed to perform initial sync", error);
       }
+    }
+  }
+
+  async sendEmail({
+    from,
+    subject,
+    body,
+    inReplyTo,
+    references,
+    to,
+    cc,
+    bcc,
+    threadId,
+    replyTo,
+  }: {
+    from: EmailAddress;
+    subject: string;
+    body: string;
+    inReplyTo?: string;
+    references?: string;
+    to: EmailAddress[];
+    cc?: EmailAddress[];
+    bcc?: EmailAddress[];
+    threadId?: string;
+    replyTo?: EmailAddress;
+  }) {
+    try {
+      const response = await axios.post(
+        "https://api.aurinko.io/v1/email/message",
+        {
+          from,
+          subject,
+          body,
+          inReplyTo,
+          references,
+          to,
+          cc,
+          bcc,
+          threadId,
+          replyTo: [replyTo],
+        },
+        {
+          params: {
+            returnIds: true,
+          },
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        },
+      );
+
+      console.log("Email sent", response.data);
+
+      return response.data as unknown;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          "Error sending email:",
+          JSON.stringify(error.response?.data, null, 2),
+        );
+      } else {
+        console.error("Error sending email:", error);
+      }
+
+      throw error;
     }
   }
 }

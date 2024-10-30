@@ -4,14 +4,19 @@ import { useEffect, useState } from "react";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { EmailEditor } from "@/app/mail/email-editor";
 import { useThreads } from "@/hooks/use-threads";
+import { useToast } from "@/hooks/use-toast";
 import { type Value } from "@/types";
 
 interface Props {
   replyDetails: RouterOutputs["account"]["getReplyDetails"];
   threadId?: string | null;
+  accountId: string;
 }
 
-const Component = ({ replyDetails, threadId }: Props) => {
+const Component = ({ replyDetails, threadId, accountId }: Props) => {
+  const sendEmail = api.account.sendEmail.useMutation();
+  const { toast } = useToast();
+
   const [subject, setSubject] = useState(
     replyDetails.subject.startsWith("Re:")
       ? replyDetails.subject
@@ -25,7 +30,37 @@ const Component = ({ replyDetails, threadId }: Props) => {
   );
 
   const handleSubmit = async (value: string) => {
-    console.log(value);
+    if (!replyDetails) return;
+
+    sendEmail.mutate(
+      {
+        accountId,
+        threadId: threadId ?? undefined,
+        body: value,
+        subject,
+        from: replyDetails.from,
+        to: replyDetails.to.map((to) => ({
+          address: to.address,
+          name: to.name ?? "",
+        })),
+        cc: ccValues.map((cc) => ({ address: cc.value, name: cc.label })),
+        replyTo: replyDetails.from,
+        inReplyTo: replyDetails.id,
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Email sent",
+          });
+        },
+        onError: (error) => {
+          console.error("Error sending email:", error);
+          toast({
+            title: "Error sending email",
+          });
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -55,7 +90,7 @@ const Component = ({ replyDetails, threadId }: Props) => {
       setCcValues={setCcValues}
       to={replyDetails.to.map((to) => to.address)}
       handleSend={handleSubmit}
-      isSending={false}
+      isSending={sendEmail.isPending}
     />
   );
 };
@@ -69,5 +104,11 @@ export const ReplyBox = () => {
 
   if (!replyDetails) return null;
 
-  return <Component replyDetails={replyDetails} threadId={threadId} />;
+  return (
+    <Component
+      replyDetails={replyDetails}
+      threadId={threadId}
+      accountId={accountId}
+    />
+  );
 };
