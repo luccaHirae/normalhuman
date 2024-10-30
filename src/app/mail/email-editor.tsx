@@ -1,7 +1,8 @@
 "use client";
 
 import StarterKit from "@tiptap/starter-kit";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { readStreamableValue } from "ai/rsc";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { Text } from "@tiptap/extension-text";
 import { EditorMenubar } from "@/app/mail/editor-menubar";
@@ -9,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TagInput } from "@/app/mail/tag-input";
+import { AIComposeButton } from "@/app/mail/ai-compose-button";
+import { generate } from "@/app/mail/action";
 import { type Value } from "@/types";
 
 interface Props {
@@ -38,20 +41,13 @@ export const EmailEditor = ({
 }: Props) => {
   const [value, setValue] = useState("");
   const [expanded, setExpanded] = useState(defaultToolbarExpanded);
-
-  const toggleExpanded = () => {
-    setExpanded((prev) => !prev);
-  };
-
-  const handleClick = async () => {
-    editor?.commands.clearContent();
-    handleSend(value);
-  };
+  const [token, setToken] = useState("");
 
   const CustomText = Text.extend({
     addKeyboardShortcuts() {
       return {
         "Meta-J": () => {
+          aiGenerate(this.editor.getText() ?? value).catch(console.error);
           return true;
         },
       };
@@ -65,6 +61,33 @@ export const EmailEditor = ({
       setValue(editor.getHTML());
     },
   });
+
+  const toggleExpanded = () => {
+    setExpanded((prev) => !prev);
+  };
+
+  const handleClick = async () => {
+    editor?.commands.clearContent();
+    handleSend(value);
+  };
+
+  const handleGenerate = (token: string) => {
+    editor?.commands.insertContent(token);
+  };
+
+  const aiGenerate = async (context: string) => {
+    const { output } = await generate(context);
+
+    for await (const token of readStreamableValue(output)) {
+      if (token) {
+        setToken(token);
+      }
+    }
+  };
+
+  useEffect(() => {
+    editor?.commands.insertContent(token);
+  }, [editor?.commands, token]);
 
   if (!editor) return null;
 
@@ -106,6 +129,11 @@ export const EmailEditor = ({
 
             <span>to {to.join(", ")}</span>
           </div>
+
+          <AIComposeButton
+            isComposing={defaultToolbarExpanded}
+            onGenerate={handleGenerate}
+          />
         </div>
       </div>
 
