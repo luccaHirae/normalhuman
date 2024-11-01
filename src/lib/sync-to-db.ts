@@ -1,4 +1,5 @@
 import { db } from "@/server/db";
+import { OramaClient } from "@/lib/orama";
 import {
   type EmailAttachment,
   type EmailAddress,
@@ -307,8 +308,21 @@ export async function syncEmailsToDatabase(
 ) {
   console.log("Attempting to sync emails to database, count:", emails.length);
 
+  const orama = new OramaClient(accountId);
+
+  await orama.initialize();
+
   try {
     for (let i = 0; i < emails.length; i++) {
+      await orama.insert({
+        subject: emails[i]!.subject,
+        body: emails[i]!.body,
+        from: emails[i]!.from.address,
+        to: emails[i]!.to.map((to) => to.address),
+        sentAt: emails[i]!.sentAt,
+        threadId: emails[i]!.threadId,
+      } as never);
+
       await upsertEmail(emails[i]!, accountId, i);
     }
   } catch (error) {

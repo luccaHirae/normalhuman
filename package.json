@@ -17,6 +17,8 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.70",
     "@clerk/nextjs": "^5.7.2",
+    "@orama/orama": "^3.0.1",
+    "@orama/plugin-data-persistence": "^3.0.1",
     "@prisma/client": "^5.14.0",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
