@@ -14,6 +14,7 @@ import { AccountSwitcher } from "@/app/mail/account-switcher";
 import { Sidebar } from "@/app/mail/sidebar";
 import { ThreadList } from "@/app/mail/thread-list";
 import { ThreadDisplay } from "@/app/mail/thread-display";
+import { SearchBar } from "@/app/mail/search-bar";
 
 interface Props {
   defaultLayout?: number[];
@@ -93,6 +94,8 @@ export const Mail = ({
             </div>
 
             <Separator />
+
+            <SearchBar />
 
             <TabsContent value="inbox">
               <ThreadList />

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { Account } from "@/lib/account";
+import { OramaClient } from "@/lib/orama";
 import { emailAddressSchema } from "@/types";
 import { type Prisma } from "@prisma/client";
 
@@ -261,5 +262,29 @@ export const accountRouter = createTRPCRouter({
         inReplyTo: input.inReplyTo,
         threadId: input.threadId,
       });
+    }),
+
+  searchEmails: privateProcedure
+    .input(
+      z.object({
+        accountId: z.string(),
+        query: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const account = await authorizeAccountAccess(
+        input.accountId,
+        ctx.auth.userId,
+      );
+
+      const orama = new OramaClient(account.id);
+
+      await orama.initialize();
+
+      const results = await orama.search({
+        term: input.query,
+      });
+
+      return results;
     }),
 });

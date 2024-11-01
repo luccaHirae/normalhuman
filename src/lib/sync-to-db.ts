@@ -1,5 +1,6 @@
 import { db } from "@/server/db";
 import { OramaClient } from "@/lib/orama";
+import { turndown } from "@/lib/turndown";
 import {
   type EmailAttachment,
   type EmailAddress,
@@ -314,9 +315,14 @@ export async function syncEmailsToDatabase(
 
   try {
     for (let i = 0; i < emails.length; i++) {
+      const turnedDownBody = turndown.turndown(
+        emails[i]!.body ?? emails[i]!.bodySnippet ?? "",
+      );
+
       await orama.insert({
         subject: emails[i]!.subject,
-        body: emails[i]!.body,
+        body: turnedDownBody,
+        rawBody: emails[i]!.bodySnippet ?? "",
         from: emails[i]!.from.address,
         to: emails[i]!.to.map((to) => to.address),
         sentAt: emails[i]!.sentAt,
