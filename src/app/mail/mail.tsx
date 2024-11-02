@@ -15,6 +15,7 @@ import { Sidebar } from "@/app/mail/sidebar";
 import { ThreadList } from "@/app/mail/thread-list";
 import { ThreadDisplay } from "@/app/mail/thread-display";
 import { SearchBar } from "@/app/mail/search-bar";
+import { AskAi } from "@/app/mail/ask-ai";
 
 interface Props {
   defaultLayout?: number[];
@@ -66,6 +67,8 @@ export const Mail = ({
             <Sidebar isCollapsed={isCollapsed} />
 
             <div className="flex-1"></div>
+
+            <AskAi isCollapsed={isCollapsed} />
           </div>
         </ResizablePanel>
 
