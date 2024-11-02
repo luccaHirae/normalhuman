@@ -2,12 +2,17 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { api } from "@/trpc/react";
 import { FREE_CREDITS_PER_DAY } from "@/constants";
 import { StripeButton } from "@/app/mail/stripe-button";
 import { getSubscriptionStatus } from "@/lib/stripe-actions";
+import { useThreads } from "@/hooks/use-threads";
 
 export const PremiumBanner = () => {
-  const remainingCredits = 5;
+  const { accountId } = useThreads();
+  const { data } = api.account.getChatbotInteraction.useQuery({
+    accountId,
+  });
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
@@ -32,7 +37,8 @@ export const PremiumBanner = () => {
             <h1 className="text-xl font-bold text-white">Basic Plan</h1>
 
             <p className="text-sm text-gray-400 md:max-w-full">
-              {remainingCredits} / {FREE_CREDITS_PER_DAY} messages remaining
+              {data?.remainingCredits} / {FREE_CREDITS_PER_DAY} messages
+              remaining
             </p>
           </div>
 

@@ -3,8 +3,10 @@
 import { useChat } from "ai/react";
 import { Send, SparklesIcon } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 import { useThreads } from "@/hooks/use-threads";
+import { useToast } from "@/hooks/use-toast";
 import { PremiumBanner } from "@/app/mail/premium-banner";
 
 interface Props {
@@ -12,14 +14,23 @@ interface Props {
 }
 
 export const AskAi = ({ isCollapsed }: Props) => {
+  const { toast } = useToast();
   const { accountId } = useThreads();
+  const utils = api.useUtils();
   const { input, handleInputChange, handleSubmit, messages } = useChat({
     api: "/api/chat",
     body: {
       accountId,
     },
     onError: (error) => {
+      toast({
+        title: "Exceeded daily limit",
+        description: error.message,
+      });
       console.error(error);
+    },
+    onFinish: () => {
+      utils.account.getChatbotInteraction.refetch().catch(console.error);
     },
     initialMessages: [],
   });

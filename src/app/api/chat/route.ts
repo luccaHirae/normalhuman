@@ -7,6 +7,9 @@ import {
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { auth } from "@clerk/nextjs/server";
 import { OramaClient } from "@/lib/orama";
+import { getSubscriptionStatus } from "@/lib/stripe-actions";
+import { db } from "@/server/db";
+import { FREE_CREDITS_PER_DAY } from "@/constants";
 import { type Point } from "framer-motion";
 
 interface JSON {
@@ -38,6 +41,8 @@ const openai = new OpenAIApi(
 );
 
 export const POST = async (req: NextRequest) => {
+  const today = new Date().toDateString();
+
   try {
     const { userId } = auth();
 
@@ -46,6 +51,32 @@ export const POST = async (req: NextRequest) => {
         { message: "User not authenticated" },
         { status: 401 },
       );
+    }
+
+    const isSubscribed = await getSubscriptionStatus();
+
+    if (!isSubscribed) {
+      const chatbotInteraction = await db.chatbotInteraction.findUnique({
+        where: {
+          userId,
+          day: today,
+        },
+      });
+
+      if (!chatbotInteraction) {
+        await db.chatbotInteraction.create({
+          data: {
+            day: today,
+            userId,
+            count: 1,
+          },
+        });
+      } else if (chatbotInteraction.count >= FREE_CREDITS_PER_DAY) {
+        return NextResponse.json({
+          message: "You have exceeded the free limit for today",
+          status: 429,
+        });
+      }
     }
 
     const { accountId, messages } = req.json() as unknown as JSON;
@@ -99,6 +130,17 @@ export const POST = async (req: NextRequest) => {
         console.log("Stream started");
       },
       onCompletion: async (completion) => {
+        await db.chatbotInteraction.update({
+          where: {
+            userId,
+            day: today,
+          },
+          data: {
+            count: {
+              increment: 1,
+            },
+          },
+        });
         console.log("Stream completed", completion);
       },
     });

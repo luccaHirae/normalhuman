@@ -4,6 +4,7 @@ import { db } from "@/server/db";
 import { Account } from "@/lib/account";
 import { OramaClient } from "@/lib/orama";
 import { emailAddressSchema } from "@/types";
+import { FREE_CREDITS_PER_DAY } from "@/constants";
 import { type Prisma } from "@prisma/client";
 
 export const authorizeAccountAccess = async (
@@ -286,5 +287,31 @@ export const accountRouter = createTRPCRouter({
       });
 
       return results;
+    }),
+
+  getChatbotInteraction: privateProcedure
+    .input(
+      z.object({
+        accountId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      await authorizeAccountAccess(input.accountId, ctx.auth.userId);
+
+      const today = new Date().toDateString();
+
+      const chatbotInteraction = await db.chatbotInteraction.findUnique({
+        where: {
+          userId: ctx.auth.userId,
+          day: today,
+        },
+      });
+
+      const remainingCredits =
+        FREE_CREDITS_PER_DAY - (chatbotInteraction?.count ?? 0);
+
+      return {
+        remainingCredits,
+      };
     }),
 });
