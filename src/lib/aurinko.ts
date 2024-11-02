@@ -2,6 +2,9 @@
 
 import axios from "axios";
 import { auth } from "@clerk/nextjs/server";
+import { getSubscriptionStatus } from "@/lib/stripe-actions";
+import { db } from "@/server/db";
+import { FREE_ACCOUNTS_PER_USER, PRO_ACCOUNTS_PER_USER } from "@/constants";
 
 interface TokenResponse {
   accountId: number;
@@ -22,6 +25,26 @@ export const getAurinkoAuthUrl = async (
 
   if (!userId) {
     throw new Error("User not authenticated");
+  }
+
+  const isSubscribed = await getSubscriptionStatus();
+
+  const accounts = await db.account.count({
+    where: {
+      userId,
+    },
+  });
+
+  if (isSubscribed) {
+    if (accounts >= PRO_ACCOUNTS_PER_USER) {
+      throw new Error("You have reached the maximum number of accounts");
+    }
+  } else {
+    if (accounts >= FREE_ACCOUNTS_PER_USER) {
+      throw new Error(
+        "You have reached the maximum number of accounts for the free plan",
+      );
+    }
   }
 
   const params = new URLSearchParams({

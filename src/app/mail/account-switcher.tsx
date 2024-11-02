@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAurinkoAuthUrl } from "@/lib/aurinko";
 
@@ -23,10 +24,30 @@ export const AccountSwitcher = ({ isCollapsed }: Props) => {
     "normalhuman:accountId",
     "",
   );
+  const { toast } = useToast();
 
   const handleAddAccount = async () => {
-    const authUrl = await getAurinkoAuthUrl("Google");
-    window.location.href = authUrl;
+    try {
+      const authUrl = await getAurinkoAuthUrl("Google");
+      window.location.href = authUrl;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          "You have reached the maximum number of accounts",
+        )
+      ) {
+        toast({
+          title: "Maximum accounts reached",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Failed to add account",
+          description: "An unknown error occurred, please try again later.",
+        });
+      }
+    }
   };
 
   if (isLoading || !data) return null;
