@@ -1,11 +1,26 @@
+import { useEffect, useState } from "react";
+import {
+  createBillingPortalSession,
+  createCheckoutSession,
+  getSubscriptionStatus,
+} from "@/lib/stripe-actions";
 import { Button } from "@/components/ui/button";
-import { createCheckoutSession } from "@/lib/stripe-actions";
 
 export const StripeButton = () => {
-  const isSubscribed = false;
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  useEffect(() => {
+    void (async () => {
+      setIsSubscribed(await getSubscriptionStatus());
+    })();
+  }, []);
 
   const handleClick = async () => {
-    await createCheckoutSession();
+    if (isSubscribed) {
+      await createBillingPortalSession();
+    } else {
+      await createCheckoutSession();
+    }
   };
 
   return (
