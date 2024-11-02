@@ -5,6 +5,7 @@ import { Send, SparklesIcon } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useThreads } from "@/hooks/use-threads";
+import { PremiumBanner } from "@/app/mail/premium-banner";
 
 interface Props {
   isCollapsed: boolean;
@@ -27,6 +28,10 @@ export const AskAi = ({ isCollapsed }: Props) => {
 
   return (
     <div className="mb-14 p-4">
+      <PremiumBanner />
+
+      <div className="h-4"></div>
+
       <motion.div className="flex flex-1 flex-col items-end rounded-lg bg-gray-100 p-4 pb-4 shadow-inner dark:bg-gray-900">
         <div
           className="flex max-h-[50vh] w-full flex-col gap-2 overflow-y-scroll"
