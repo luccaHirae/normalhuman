@@ -1,0 +1,17 @@
+"use client";
+
+import React from "react";
+import { getAurinkoAuthUrl } from "@/lib/aurinko";
+import { Button } from "./ui/button";
+
+const LinkAccountButton = () => {
+  const handleClick = async () => {
+    const authUrl = await getAurinkoAuthUrl("Google");
+
+    window.location.href = authUrl;
+  };
+
+  return <Button onClick={handleClick}>Link Account</Button>;
+};
+
+export default LinkAccountButton;
